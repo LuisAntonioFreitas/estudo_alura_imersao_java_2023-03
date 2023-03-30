@@ -1,30 +1,43 @@
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.List;
-import java.util.Map;
 
 public class Main {
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) {
 
         //System.out.println("Hello world!");
 
-        // fazer uma conexão HTTP e buscar os top 250 filmes
-        //String url = "https://imdb-api.com/en/API/Top250Movies/k_0ojt0yvm"; //alterar <k_0ojt0yvm> por sua key (imdb)
-        String url = "https://raw.githubusercontent.com/alura-cursos/imersao-java-2-api/main/TopMovies.json";
-        URI endereco = URI.create(url);
-        var client = HttpClient.newHttpClient();
-        var request = HttpRequest.newBuilder(endereco).GET().build();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        String body = response.body();
+        API api = API.ALURA_IMDB;
 
-        // extrair só os dados que interessam (titulo, poster, classificação)
-        var parser = new JsonParser();
-        List<Map<String, String>> listaDeFilmes = parser.parse(body);
+        String url = api.getUrl();
+        IExtratorDeConteudo extrator = api.getExtrator();
+
+        ClienteHttp http = new ClienteHttp();
+        String json = http.buscaDados(url);
+
+        // exibir e manipular os dados
+        List<Conteudo> conteudos = extrator.extraiConteudos(json);
+
+        // exibir e manipular os dados
+        GeradoraDeFigurinhas geradora = new GeradoraDeFigurinhas();
+
+        try {
+            for (int i = 0; i < 10; i++) {
+
+                Conteudo conteudo = conteudos.get(i);
+
+                InputStream inputStream = new URL(conteudo.urlImagem()).openStream();
+                String nomeArquivo = "saida/" +
+                        conteudo.titulo().replaceAll("[^a-zA-Z0-9]","") +
+                        ".png";
+
+                geradora.cria(inputStream, nomeArquivo);
+
+                System.out.println(conteudo.titulo());
+                System.out.println();
+            }
+        } catch (Exception ignored) {}
+
 
 //        // exibir e manipular os dados
 //        for (Map<String,String> filme : listaDeFilmes) {
@@ -34,31 +47,30 @@ public class Main {
 //            System.out.println();
 //        }
 
-        // exibir e manipular os dados
-        var geradora = new GeradoraDeFigurinhas();
-        for (Map<String,String> filme : listaDeFilmes) {
-
-            String urlImagem = filme.get("image");
-            String titulo = filme.get("title");
-            String rating = filme.get("imDbRating");
-            String image = filme.get("image");
-
-            InputStream inputStream = new URL(urlImagem).openStream();
-            String nomeArquivo = titulo
-                    .trim()
-                    .replace(" ", "")
-                    .replaceAll("[^a-zA-Z0-9]","")
-                    + ".png";
-
-            geradora.cria(inputStream, nomeArquivo);
-
-            System.out.println(titulo);
-            System.out.println(rating);
-            System.out.println(image);
-            System.out.println(nomeArquivo);
-            System.out.println();
-        }
-
+//        // exibir e manipular os dados
+//        GeradoraDeFigurinhas geradora = new GeradoraDeFigurinhas();
+//        for (Map<String,String> filme : listaDeFilmes) {
+//
+//            String urlImagem = filme.get("image");
+//            String titulo = filme.get("title");
+//            String rating = filme.get("imDbRating");
+//            String image = filme.get("image");
+//
+//            InputStream inputStream = new URL(urlImagem).openStream();
+//            String nomeArquivo = titulo
+//                    .trim()
+//                    .replace(" ", "")
+//                    .replaceAll("[^a-zA-Z0-9]","")
+//                    + ".png";
+//
+//            geradora.cria(inputStream, nomeArquivo);
+//
+//            System.out.println(titulo);
+//            System.out.println(rating);
+//            System.out.println(image);
+//            System.out.println(nomeArquivo);
+//            System.out.println();
+//        }
 
     }
 }

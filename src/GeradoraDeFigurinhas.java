@@ -1,6 +1,4 @@
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +21,7 @@ public class GeradoraDeFigurinhas {
         // cria nova imagem em memória com transparência e com tamanho novo
         int largura = imagemOriginal.getWidth();
         int altura = imagemOriginal.getHeight();
-        int novaAltura = altura + 200;
+        int novaAltura = altura + 150;
         BufferedImage novaImagem = new BufferedImage(largura, novaAltura, BufferedImage.TRANSLUCENT);
 
         // copiar a imagem original pra novo imagem (em memória)
@@ -36,11 +34,23 @@ public class GeradoraDeFigurinhas {
         graphics.setFont(fonte);
 
         // escrever uma frase na nova imagem
-        graphics.drawString("TOPZERA", 100, novaAltura - 100);
+        //graphics.drawString("TOPZERA", 100, novaAltura - 100);
+        centralizarTexto("TOPZERA", largura, novaAltura, graphics);
 
         // escrever a nova imagem em um arquivo
-        ImageIO.write(novaImagem, "png", new File("saida/" + nomeArquivo));
+        ImageIO.write(novaImagem, "png", new File(nomeArquivo));
 
+    }
+
+    private void centralizarTexto(String s, int w, int h, Graphics2D g) {
+
+        FontMetrics fm = g.getFontMetrics();
+        int x = (w - fm.stringWidth(s)) / 2;
+        int y = (fm.getAscent() + (h - (fm.getAscent() + fm.getDescent())) / 2);
+
+        y = h - 40;
+
+        g.drawString(s, x, y);
     }
 
 }
